@@ -213,7 +213,6 @@ ${FIRMWARE_LIST}    📅 *编译时间*: ${BUILD_TIME}"
           -d chat_id="${TELEGRAM_CHAT_ID}" \
           -d parse_mode="Markdown" \
           -d text="$MESSAGE"
-
            
     - name: 删除旧的 Workflow Runs（保留最近 3 次）
       env:
