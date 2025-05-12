@@ -188,34 +188,31 @@ jobs:
           ./artifact/*rootfs.tar.gz
         bodyFile: ./doc/release.md
 
-- name: 发送 Telegram 通知
-  env:
-    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-  run: |
-    BUILD_TIME=$(date '+%Y-%m-%d %H:%M:%S')
+    - name: 发送 Telegram 通知
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        BUILD_TIME=$(date '+%Y-%m-%d %H:%M:%S')
 
-    # 构建固件列表，每行带 4 个空格缩进
-    FIRMWARE_LIST=""
-    for FILE in ./artifact/*.img.gz; do
-      NAME=$(basename "$FILE")
-      KERNEL_VER=$(echo "$NAME" | grep -oE 'k[0-9]+\.[0-9]+(\.[0-9]+)?' | sed 's/^k//')
-      FIRMWARE_LIST="${FIRMWARE_LIST}    🧬 内核 ${KERNEL_VER} → \`${NAME}\`\n"
-    done
+        # 构建固件列表，每行前加 4 个空格
+        FIRMWARE_LIST=""
+        for FILE in ./artifact/*.img.gz; do
+          NAME=$(basename "$FILE")
+          KERNEL_VER=$(echo "$NAME" | grep -oE 'k[0-9]+\.[0-9]+(\.[0-9]+)?' | sed 's/^k//')
+          FIRMWARE_LIST="${FIRMWARE_LIST}    🧬 内核 ${KERNEL_VER} → \`${NAME}\`\n"
+        done
 
-    MESSAGE=$(cat <<EOF
-    ✅ *N1 固件编译成功！*
+        # 手动拼接带换行的 MESSAGE，每行前四个空格
+        MESSAGE="✅ *N1 固件编译成功！*\n\n\
+    📦 *固件名称*: ${GITHUB_WORKFLOW}\n\
+    🛠 *OpenWrt 版本*: ${{ env.latest_release }}\n\
+${FIRMWARE_LIST}    📅 *编译时间*: ${BUILD_TIME}"
 
-    📦 *固件名称*: ${GITHUB_WORKFLOW}
-    🛠 *OpenWrt 版本*: ${{ env.latest_release }}
-${FIRMWARE_LIST}    📅 *编译时间*: ${BUILD_TIME}
-EOF
-    )
-
-    curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-      -d chat_id="${TELEGRAM_CHAT_ID}" \
-      -d parse_mode="Markdown" \
-      -d text="$MESSAGE"
+        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          -d chat_id="${TELEGRAM_CHAT_ID}" \
+          -d parse_mode="Markdown" \
+          -d text="$MESSAGE"
 
            
     - name: 删除旧的 Workflow Runs（保留最近 3 次）
