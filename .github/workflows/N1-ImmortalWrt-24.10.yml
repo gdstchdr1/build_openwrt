@@ -92,6 +92,12 @@ jobs:
     - name: Cache
       uses: HiGarfield/cachewrtbuild@main
       with:
+        mixkey: ImmortalWrt-18.06-k5.4-${{ env.build_date }}
+        prefix: ${{ github.workspace }}/openwrt
+ 
+    - name: Cache
+      uses: HiGarfield/cachewrtbuild@main
+      with:
         mixkey: ImmortalWrt-${{ env.latest_release }}-${{ env.build_date }}
         prefix: ${{ github.workspace }}/openwrt
 
