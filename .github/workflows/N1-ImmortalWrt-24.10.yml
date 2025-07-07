@@ -60,6 +60,11 @@ jobs:
         sudo -E git config --global core.abbrev auto
         df -h
 
+    - name: Fix symbolic link for openwrt path (if needed)
+      run: |
+        mkdir -p /home/runner/work/_actions/ffuqiangg/amlogic-s9xxx-openwrt/main/
+        ln -sf /home/runner/work/build_openwrt/build_openwrt/openwrt /home/runner/work/_actions/ffuqiangg/amlogic-s9xxx-openwrt/main/openwrt
+
     - name: Prepare source code
       run: |
         sudo chown -R runner:runner /home/runner/work/build_openwrt
